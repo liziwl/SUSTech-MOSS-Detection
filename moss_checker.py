@@ -5,6 +5,7 @@ import socks
 import socket
 
 import moss_id
+import result_html2csv
 
 class SS:
     """
@@ -22,7 +23,7 @@ class SS:
         print("Restore proxy")
 
 
-def get_res_xml(loc_res_dir):
+def get_res_by_ext(loc_res_dir):
     files_list = list()
     exten = ['c', 'h', 'cpp', 'hpp']
     for r, d, files in os.walk(loc_res_dir):
@@ -42,12 +43,26 @@ if __name__ == '__main__':
     # "cc" for C++ / "c" for C
     m = mosspy.Moss(userid, "cc")
     # Submission Files
-    for i in get_res_xml('input/ass1'):
-        m.addFile(i)
+    # file_list = get_res_by_ext('input/Assignment 1_20190525200309')
+    # file_list = get_res_by_ext('input/Assignment 2_20190525200347')
+    # file_list = get_res_by_ext('input/Assignment 3_20190525200421')
+    # file_list = get_res_by_ext('input/Assignment 4_20190525200439')
+    file_list = get_res_by_ext('input/Assignment 5_20190525200455')
+    # file_list = get_res_by_ext('input/Assignment 6_20190525200517')
+    for i in get_res_by_ext('C:\\Users\liziq\\Desktop\\ass5'):
+        m.addBaseFile(i)
+
+    for i in file_list:
+        try:
+            m.addFile(i)
+        except Exception as e:
+            pass
 
     url = m.send()  # Submission Report URL
 
     print("Report Url: " + url)
 
     # Save report file
-    m.saveWebPage(url, "submission/report.html")
+    num = 5
+    m.saveWebPage(url, "submission/report{}.html".format(num))
+    result_html2csv.csv_report("submission/report{}.html".format(num),num)

@@ -23,10 +23,9 @@ def get_sim_list(table):
     return out
 
 
-
-def csv_report(html_report,num):
-    html = open(html_report, encoding='utf8').read()
-    soup = BeautifulSoup(html, features='lxml')
+def csv_report(html_report, num):
+    with open(html_report, encoding='utf8').read() as html:
+        soup = BeautifulSoup(html, features='lxml')
     table = soup.find("table")
 
     output_rows = []
@@ -40,8 +39,6 @@ def csv_report(html_report,num):
             output_row.append(columns[0].find('a').get('href'))
             print(output_row)
             output_rows.append(output_row)
-
-
 
     with open('output{}.csv'.format(num), "w", encoding='utf_8_sig', newline='')as csvfile:
         writer = csv.writer(csvfile)

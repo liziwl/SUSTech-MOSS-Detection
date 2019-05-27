@@ -3,5 +3,6 @@ venv/
 input/
 submission/
 __pycache__/
+report/
 
 *.csv

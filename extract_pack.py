@@ -4,13 +4,15 @@ import fnmatch
 from py7zr import unpack_7zarchive
 import rarfile
 
+register_unpack_format('7zip', ['.7z'], unpack_7zarchive)
 
+
+# need unrar program
 def unpack_rar(archive, path, extra=None):
     arc = rarfile.RarFile(archive)
     arc.extractall(path)
 
 
-register_unpack_format('7zip', ['.7z'], unpack_7zarchive)
 register_unpack_format('RAR', ['.rar'], unpack_rar)
 
 
@@ -22,6 +24,10 @@ def extract(compressed_file, path_to_extract):
 
 
 def recursive_unpack(dir_path):
+    """
+    - recursively unpack compressed file in dir_path
+    - delete compressed file after decompressed
+    """
     exten = ['7z', 'zip', 'rar']
     one_more = False
     for r, d, files in os.walk(dir_path):
@@ -33,7 +39,8 @@ def recursive_unpack(dir_path):
                 packed.extend(tmp_paths)
         if not one_more and len(packed) > 0:
             one_more = True
-        print(packed)
+        if len(packed) > 0:
+            print("unpack list:", packed)
         for p in packed:
             extract(p, os.path.dirname(p))
             os.remove(p)
@@ -41,4 +48,5 @@ def recursive_unpack(dir_path):
         recursive_unpack(dir_path)
 
 
-recursive_unpack('input')
+if __name__ == '__main__':
+    recursive_unpack('input')

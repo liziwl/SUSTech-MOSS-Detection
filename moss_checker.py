@@ -7,9 +7,11 @@ import socket
 import moss_id
 import result_html2csv
 
+
 class SS:
     """
     For proxy
+    Set if connection refused
     """
 
     def __init__(self):
@@ -42,27 +44,38 @@ if __name__ == '__main__':
 
     # "cc" for C++ / "c" for C
     m = mosspy.Moss(userid, "cc")
+
+    # Submission Base Files
+    # print("-" * 50)
+    # print("Add base file")
+    # sub_file_dir_path = 'C:\\Users\liziq\\Desktop\\ass5'
+    # file_list = get_res_by_ext(sub_file_dir_path)
+    # for i in file_list:
+    #     m.addBaseFile(i)
+    # print("-" * 50)
+
     # Submission Files
-    # file_list = get_res_by_ext('input/Assignment 1_20190525200309')
-    # file_list = get_res_by_ext('input/Assignment 2_20190525200347')
-    # file_list = get_res_by_ext('input/Assignment 3_20190525200421')
-    # file_list = get_res_by_ext('input/Assignment 4_20190525200439')
-    file_list = get_res_by_ext('input/Assignment 5_20190525200455')
-    # file_list = get_res_by_ext('input/Assignment 6_20190525200517')
-    for i in get_res_by_ext('C:\\Users\liziq\\Desktop\\ass5'):
-        m.addBaseFile(i)
+    print("Add file")
+    sub_file_dir_path = 'input/Assignment 1_20190525200309'
+    file_list = get_res_by_ext(sub_file_dir_path)
 
     for i in file_list:
         try:
             m.addFile(i)
         except Exception as e:
-            pass
+            print(i, e, end="")
+            print(" or File size is zero")
+    print("-" * 50)
 
-    url = m.send()  # Submission Report URL
-
+    # Submission Report URL
+    url = m.send()
     print("Report Url: " + url)
 
     # Save report file
-    num = 5
-    m.saveWebPage(url, "submission/report{}.html".format(num))
-    result_html2csv.csv_report("submission/report{}.html".format(num),num)
+    os.makedirs("report")
+    html_path = os.path.join("report", os.path.basename(sub_file_dir_path) + '.html')
+    m.saveWebPage(url, html_path)
+    result_html2csv.csv_report(html_path)
+
+    # Download whole report locally including code diff links
+    mosspy.download_report(url, os.path.join("report", os.path.basename(sub_file_dir_path)), connections=8)

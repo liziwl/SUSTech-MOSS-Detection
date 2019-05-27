@@ -1,31 +1,32 @@
 from bs4 import BeautifulSoup
 import csv
 import re
+from os.path import join, basename, dirname, splitext
 
 
-def is_similar(row):
+def is_similar_uid(row):
     file1, file2 = row[0:2]
-    p = re.compile(r"11\d{6}")
-    id1 = p.findall(file1)[0]
-    id2 = p.findall(file2)[0]
-    if id1 != id2:
+    p = re.compile(r"\(11\d{6}\)")
+    id1 = p.findall(file1)[0][1:-1]
+    id2 = p.findall(file2)[0][1:-1]
+    if int(id1) != int(id2):
         print(row)
-        return True
-    else:
         return False
+    else:
+        return True
 
 
 def get_sim_list(table):
     out = []
     for r in table:
-        if len(r) > 0 and is_similar(r):
+        if len(r) > 0 and not is_similar_uid(r):
             out.append(r)
     return out
 
 
-def csv_report(html_report, num):
-    with open(html_report, encoding='utf8').read() as html:
-        soup = BeautifulSoup(html, features='lxml')
+def csv_report(html_report_path, remove_dup_uid_csv_path=None, all_csv_path=None):
+    html = open(html_report_path, encoding='utf8').read()
+    soup = BeautifulSoup(html, features='lxml')
     table = soup.find("table")
 
     output_rows = []
@@ -40,14 +41,20 @@ def csv_report(html_report, num):
             print(output_row)
             output_rows.append(output_row)
 
-    with open('output{}.csv'.format(num), "w", encoding='utf_8_sig', newline='')as csvfile:
+    if all_csv_path is None:
+        org_name = splitext(basename(html_report_path))[0]
+        all_csv_path = join(dirname(html_report_path), org_name + ".csv")
+    with open(all_csv_path, "w", encoding='utf_8_sig', newline='')as csvfile:
         writer = csv.writer(csvfile)
         for i_row in output_rows:
             if len(i_row) > 0:
                 writer.writerow(i_row)
-                is_similar(i_row)
+                is_similar_uid(i_row)
 
-    with open('output_dup{}.csv'.format(num), "w", encoding='utf_8_sig', newline='')as csvfile:
+    if remove_dup_uid_csv_path is None:
+        org_name = splitext(basename(html_report_path))[0]
+        remove_dup_uid_csv_path = join(dirname(html_report_path), org_name + "_unq.csv")
+    with open(remove_dup_uid_csv_path, "w", encoding='utf_8_sig', newline='')as csvfile:
         writer = csv.writer(csvfile)
         tmp = get_sim_list(output_rows)
         tmp.sort(key=lambda k: k[2], reverse=True)
